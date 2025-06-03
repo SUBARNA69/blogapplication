@@ -1,5 +1,6 @@
 using blogapplication.Data;
 using blogapplication.Hubs;
+using blogapplication.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,7 @@ namespace blogapplication
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn")));
             builder.Services.AddSignalR();
-
+            builder.Services.AddScoped<IOcrService, TesseractOcrService>();
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(o =>
             {

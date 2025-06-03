@@ -1,0 +1,93 @@
+﻿@model blogapplication.Models.KycDetail
+
+@if (Model != null)
+{
+    var statusClass = Model.Status switch
+    {
+        "Verified" => "bg-green-100 text-green-800 border-green-200",
+        "Pending" => "bg-yellow-100 text-yellow-800 border-yellow-200",
+        "Rejected" => "bg-red-100 text-red-800 border-red-200",
+        _ => "bg-gray-100 text-gray-800 border-gray-200"
+    };
+
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    @switch (Model.Status)
+                    {
+                        case "Verified":
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            break;
+                        case "Pending":
+                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            break;
+                        case "Rejected":
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            break;
+                        default:
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            break;
+                    }
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">KYC Status</h3>
+                    <p class="text-sm text-gray-600">
+                        @switch (Model.Status)
+                        {
+                            case "Verified":
+                                <text>Your identity is verified</text>
+                                break;
+                            case "Pending":
+                                <text>Under review - submitted @Model.SubmittedAt.ToString("MMM dd")</text>
+                                break;
+                            case "Rejected":
+                                <text>Verification rejected - action required</text>
+                                break;
+                            default:
+                                <text>Status: @Model.Status</text>
+                                break;
+                        }
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @statusClass">
+                    @Model.Status
+                </span>
+                <a href="@Url.Action("Status", "Kyc")"
+                   class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    View Details
+                </a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h3 class="text-lg font-semibold text-blue-900">Complete Your KYC</h3>
+                    <p class="text-sm text-blue-700">Verify your identity to access all features</p>
+                </div>
+            </div>
+            <a href="@Url.Action("Index", "Kyc")"
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                Start Verification
+            </a>
+        </div>
+    </div>
+}

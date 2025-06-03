@@ -1,0 +1,375 @@
+﻿@model IEnumerable<blogapplication.Models.KycDetail>
+
+@{
+    ViewData["Title"] = "Manage KYC Submissions";
+    Layout = "_Layout";
+    var stats = ViewBag.Stats;
+}
+
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">KYC Management</h1>
+                    <p class="text-gray-600 mt-1">Review and manage user identity verification submissions</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="@Url.Action("KycStatistics")" 
+                       class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                        View Statistics
+                    </a>
+                    <a href="@Url.Action("Index")" 
+                       class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        @if (TempData["InfoMessage"] != null)
+        {
+            <div class="mb-6 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg">
+                @TempData["InfoMessage"]
+            </div>
+        }
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Submissions</p>
+                        <p class="text-2xl font-semibold text-gray-900">@stats.Total</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Pending Review</p>
+                        <p class="text-2xl font-semibold text-yellow-600">@stats.Pending</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Verified</p>
+                        <p class="text-2xl font-semibold text-green-600">@stats.Verified</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Rejected</p>
+                        <p class="text-2xl font-semibold text-red-600">@stats.Rejected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <form method="get" class="flex flex-wrap gap-4 items-end">
+                <div class="flex-1 min-w-64">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                    <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" 
+                           placeholder="Search by user name, email, or extracted info..."
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="min-w-48">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status Filter</label>
+                    <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Statuses</option>
+                        <option value="Pending" @@(ViewBag.StatusFilter == "Pending" ? "selected" : "")>Pending</option>
+                        <option value="Verified" @@(ViewBag.StatusFilter == "Verified" ? "selected" : "")>Verified</option>
+                        <option value="Rejected" @@(ViewBag.StatusFilter == "Rejected" ? "selected" : "")>Rejected</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium">
+                        Filter
+                    </button>
+                </div>
+                
+                <div>
+                    <a href="@Url.Action("ManageKyc")" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-medium">
+                        Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <form id="bulkActionForm" method="post" asp-action="BulkKycAction">
+                @Html.AntiForgeryToken()
+                <div class="flex flex-wrap gap-4 items-end">
+                    <div class="min-w-48">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bulk Action</label>
+                        <select name="action" id="bulkAction" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select Action</option>
+                            <option value="approve">Approve Selected</option>
+                            <option value="reject">Reject Selected</option>
+                            <option value="pending">Mark as Pending</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex-1 min-w-64" id="rejectionReasonDiv" style="display: none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rejection Reason</label>
+                        <input type="text" name="bulkRejectionReason" 
+                               placeholder="Enter reason for rejection..."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-md font-medium">
+                            Execute
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- KYC Submissions Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">KYC Submissions</h3>
+                <p class="text-sm text-gray-600">@ViewBag.TotalSubmissions total submissions</p>
+            </div>
+
+            @if (Model.Any())
+            {
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left">
+                                    <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Extracted Info</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach (var kyc in Model)
+                            {
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4">
+                                        <input type="checkbox" name="selectedIds" value="@kyc.Id" class="kyc-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">@kyc.User.Name</div>
+                                                <div class="text-sm text-gray-500">@kyc.User.Email</div>
+                                                <div class="text-xs text-gray-400">ID: @kyc.UserId</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-900">@kyc.SubmittedAt.ToString("MMM dd, yyyy")</div>
+                                        <div class="text-xs text-gray-500">@kyc.SubmittedAt.ToString("h:mm tt")</div>
+                                        <div class="text-xs text-gray-400">
+                                            @{
+                                                var daysSince = (DateTime.UtcNow - kyc.SubmittedAt).Days;
+                                            }
+                                            @daysSince day@(daysSince != 1 ? "s" : "") ago
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            @(kyc.Status == "Verified" ? "bg-green-100 text-green-800" : 
+                                              kyc.Status == "Pending" ? "bg-yellow-100 text-yellow-800" : 
+                                              kyc.Status == "Rejected" ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-800")">
+                                            @kyc.Status
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @if (!string.IsNullOrEmpty(kyc.ExtractedName) || !string.IsNullOrEmpty(kyc.ExtractedCitizenshipNumber))
+                                        {
+                                            <div class="text-sm text-gray-900">
+                                                @if (!string.IsNullOrEmpty(kyc.ExtractedName))
+                                                {
+                                                    <div>@kyc.ExtractedName</div>
+                                                }
+                                                @if (!string.IsNullOrEmpty(kyc.ExtractedCitizenshipNumber))
+                                                {
+                                                    <div class="text-xs text-gray-500">@kyc.ExtractedCitizenshipNumber</div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-sm text-gray-400">Not extracted</span>
+                                        }
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex space-x-2">
+                                            <a href="@Url.Action("KycDetails", new { id = kyc.Id })" 
+                                               class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium">
+                                                Review
+                                            </a>
+                                            @if (kyc.Status == "Pending")
+                                            {
+                                                <button onclick="quickApprove(@kyc.Id)" 
+                                                        class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-medium">
+                                                    Quick Approve
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <div class="px-6 py-4 border-t border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm text-gray-700">
+                                Showing @((ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1) to @Math.Min(ViewBag.CurrentPage * ViewBag.PageSize, ViewBag.TotalSubmissions) of @ViewBag.TotalSubmissions results
+                            </div>
+                            <div class="flex space-x-2">
+                                @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+                                {
+                                    <a href="@Url.Action("ManageKyc", new { page = i, searchTerm = ViewBag.SearchTerm, status = ViewBag.StatusFilter })" 
+                                       class="px-3 py-2 text-sm @(i == ViewBag.CurrentPage ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300") rounded">
+                                        @i
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="px-6 py-12 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No KYC submissions found</h3>
+                    <p class="mt-1 text-sm text-gray-500">No submissions match your current filters.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+// Select all functionality
+document.getElementById('selectAll').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.kyc-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+});
+
+// Show/hide rejection reason field
+document.getElementById('bulkAction').addEventListener('change', function() {
+    const rejectionDiv = document.getElementById('rejectionReasonDiv');
+    if (this.value === 'reject') {
+        rejectionDiv.style.display = 'block';
+        rejectionDiv.querySelector('input').required = true;
+    } else {
+        rejectionDiv.style.display = 'none';
+        rejectionDiv.querySelector('input').required = false;
+    }
+});
+
+// Bulk action form validation
+document.getElementById('bulkActionForm').addEventListener('submit', function(e) {
+    const selectedCheckboxes = document.querySelectorAll('.kyc-checkbox:checked');
+    const action = document.getElementById('bulkAction').value;
+    
+    if (selectedCheckboxes.length === 0) {
+        e.preventDefault();
+        alert('Please select at least one KYC submission.');
+        return;
+    }
+    
+    if (!action) {
+        e.preventDefault();
+        alert('Please select an action.');
+        return;
+    }
+    
+    if (!confirm(`Are you sure you want to ${action} ${selectedCheckboxes.length} selected submission(s)?`)) {
+        e.preventDefault();
+    }
+});
+
+// Quick approve function
+function quickApprove(kycId) {
+    if (confirm('Are you sure you want to approve this KYC submission?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '@Url.Action("ApproveKyc")/' + kycId;
+        
+        const token = document.createElement('input');
+        token.type = 'hidden';
+        token.name = '__RequestVerificationToken';
+        token.value = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        
+        form.appendChild(token);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>

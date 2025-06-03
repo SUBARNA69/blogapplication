@@ -88,6 +88,69 @@ namespace blogapplication.Migrations
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("blogapplication.Models.KycDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AdminComment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExtractedCitizenshipNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExtractedName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FaceImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IdCardImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IdMatch")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NameMatch")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("OcrProcessed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserEnteredId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserEnteredName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("KycDetails");
+                });
+
             modelBuilder.Entity("blogapplication.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -148,6 +211,17 @@ namespace blogapplication.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("blogapplication.Models.KycDetail", b =>
+                {
+                    b.HasOne("blogapplication.Models.User", "User")
+                        .WithOne("KycDetail")
+                        .HasForeignKey("blogapplication.Models.KycDetail", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("blogapplication.Models.Blog", b =>
                 {
                     b.Navigation("Comments");
@@ -158,6 +232,8 @@ namespace blogapplication.Migrations
                     b.Navigation("Blogs");
 
                     b.Navigation("Comments");
+
+                    b.Navigation("KycDetail");
                 });
 #pragma warning restore 612, 618
         }

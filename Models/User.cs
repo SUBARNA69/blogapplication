@@ -12,5 +12,7 @@ namespace blogapplication.Models
         public DateTime CreatedAt { get; set; } // e.g., "Admin", "User"
         public ICollection<Blog> Blogs { get; set; }
         public ICollection<Comment> Comments { get; set; }
+        public KycDetail? KycDetail { get; set; }
+
     }
 }

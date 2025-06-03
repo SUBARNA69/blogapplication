@@ -1,0 +1,425 @@
+﻿@{
+    ViewData["Title"] = "KYC Verification";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">KYC Verification</h1>
+            <p class="text-gray-600 text-lg">Complete your identity verification to access all features</p>
+        </div>
+
+        <!-- Alert Messages -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    @TempData["SuccessMessage"]
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    @TempData["ErrorMessage"]
+                </div>
+            </div>
+        }
+
+        <!-- Main Upload Form -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-6">
+                <h2 class="text-2xl font-bold text-white">Upload Verification Documents</h2>
+                <p class="text-white text-opacity-90 mt-1">Please provide clear images of your ID and a selfie</p>
+            </div>
+
+            <form asp-action="Upload" method="post" enctype="multipart/form-data" class="p-8 space-y-8">
+                @Html.AntiForgeryToken()
+
+                <!-- Requirements Section -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-blue-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Document Requirements
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm text-blue-800">
+                        <div>
+                            <h4 class="font-medium mb-2">✅ Accepted ID Documents:</h4>
+                            <ul class="space-y-1 ml-4">
+                                <li>• National ID Card</li>
+                                <li>• Passport</li>
+                                <li>• Driver's License</li>
+                                <li>• Citizenship Certificate</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-medium mb-2">📋 Image Guidelines:</h4>
+                            <ul class="space-y-1 ml-4">
+                                <li>• Clear, high-quality images</li>
+                                <li>• All text must be readable</li>
+                                <li>• No glare or shadows</li>
+                                <li>• Maximum file size: 5MB</li>
+                                <li>• Formats: JPG, JPEG, PNG</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ID Card Upload -->
+                <div class="space-y-4">
+                    <label class="block text-lg font-semibold text-gray-900">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V4a2 2 0 114 0v2m-4 0a2 2 0 104 0m-4 0v2m4-2v2"></path>
+                            </svg>
+                            ID Card / Document
+                            <span class="text-red-500 ml-1">*</span>
+                        </span>
+                    </label>
+
+                    <div class="relative">
+                        <input type="file"
+                               name="idCardImage"
+                               id="idCardImage"
+                               accept=".jpg,.jpeg,.png"
+                               required
+                               class="hidden"
+                               onchange="handleFileSelect(this, 'idCardPreview', 'idCardLabel')">
+
+                        <label for="idCardImage"
+                               id="idCardLabel"
+                               class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                <p class="mb-2 text-sm text-gray-500">
+                                    <span class="font-semibold">Click to upload</span> your ID document
+                                </p>
+                                <p class="text-xs text-gray-500">PNG, JPG or JPEG (MAX. 5MB)</p>
+                            </div>
+                        </label>
+
+                        <div id="idCardPreview" class="hidden mt-4">
+                            <img class="max-w-full h-48 object-contain rounded-lg border" alt="ID Card Preview">
+                            <p class="text-sm text-gray-600 mt-2 font-medium"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Face Image Upload -->
+                <div class="space-y-4">
+                    <label class="block text-lg font-semibold text-gray-900">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            Selfie / Face Photo
+                            <span class="text-red-500 ml-1">*</span>
+                        </span>
+                    </label>
+
+                    <!-- Camera and Upload Options -->
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- Camera Capture -->
+                        <div class="space-y-3">
+                            <button type="button"
+                                    onclick="startCamera()"
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition duration-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>Take Selfie</span>
+                            </button>
+
+                            <div id="cameraContainer" class="hidden">
+                                <video id="video" class="w-full rounded-lg" autoplay></video>
+                                <div class="flex space-x-2 mt-3">
+                                    <button type="button"
+                                            onclick="capturePhoto()"
+                                            class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium">
+                                        Capture
+                                    </button>
+                                    <button type="button"
+                                            onclick="stopCamera()"
+                                            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-medium">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File Upload -->
+                        <div class="space-y-3">
+                            <input type="file"
+                                   name="faceImage"
+                                   id="faceImage"
+                                   accept=".jpg,.jpeg,.png"
+                                   required
+                                   class="hidden"
+                                   onchange="handleFileSelect(this, 'facePreview', 'faceLabel')">
+
+                            <label for="faceImage"
+                                   id="faceLabel"
+                                   class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <svg class="w-8 h-8 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    <p class="text-sm text-gray-500">
+                                        <span class="font-semibold">Upload selfie</span>
+                                    </p>
+                                    <p class="text-xs text-gray-500">or use camera above</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="facePreview" class="hidden mt-4">
+                        <img class="max-w-full h-48 object-contain rounded-lg border mx-auto" alt="Face Preview">
+                        <p class="text-sm text-gray-600 mt-2 font-medium text-center"></p>
+                    </div>
+                </div>
+
+                <!-- Manual Information Entry -->
+                <div class="space-y-6 pt-6 border-t border-gray-200">
+                    <div class="text-center">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Enter Your Information</h3>
+                        <p class="text-gray-600">Please enter your name and ID number exactly as shown on your document</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Name Input -->
+                        <div class="space-y-2">
+                            <label for="userEnteredName" class="block text-lg font-semibold text-gray-900">
+                                <span class="flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    Full Name
+                                    <span class="text-red-500 ml-1">*</span>
+                                </span>
+                            </label>
+                            <input type="text"
+                                   name="userEnteredName"
+                                   id="userEnteredName"
+                                   required
+                                   placeholder="Enter your full name as shown on ID"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <p class="text-sm text-gray-500">Enter exactly as written on your document</p>
+                        </div>
+
+                        <!-- ID Number Input -->
+                        <div class="space-y-2">
+                            <label for="userEnteredId" class="block text-lg font-semibold text-gray-900">
+                                <span class="flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    ID/Citizenship Number
+                                    <span class="text-red-500 ml-1">*</span>
+                                </span>
+                            </label>
+                            <input type="text"
+                                   name="userEnteredId"
+                                   id="userEnteredId"
+                                   required
+                                   placeholder="Enter your ID/citizenship number"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <p class="text-sm text-gray-500">Enter without spaces or dashes</p>
+                        </div>
+                    </div>
+
+                    <!-- OCR Information Notice -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                            <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="text-sm text-blue-800">
+                                <p class="font-medium mb-1">Automated Verification</p>
+                                <p>We will automatically extract information from your document and compare it with what you enter. This helps ensure the authenticity of your submission.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-6 border-t border-gray-200">
+                    <button type="submit"
+                            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition duration-200">
+                        <span class="flex items-center justify-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <span>Submit for Verification</span>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Privacy Notice -->
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <svg class="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        <div class="text-sm text-gray-600">
+                            <p class="font-medium text-gray-900 mb-1">Privacy & Security</p>
+                            <p>Your documents are encrypted and stored securely. We only use this information for identity verification purposes and comply with all data protection regulations.</p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Canvas for camera capture -->
+<canvas id="canvas" class="hidden"></canvas>
+
+<script>
+    let stream = null;
+    let capturedImageFile = null;
+
+    function handleFileSelect(input, previewId, labelId) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById(previewId);
+                const img = preview.querySelector('img');
+                const text = preview.querySelector('p');
+
+                img.src = e.target.result;
+                text.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                preview.classList.remove('hidden');
+
+                // Hide the upload label
+                document.getElementById(labelId).classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: 'user'
+                }
+            });
+
+            const video = document.getElementById('video');
+            const container = document.getElementById('cameraContainer');
+
+            video.srcObject = stream;
+            container.classList.remove('hidden');
+
+        } catch (err) {
+            console.error('Error accessing camera:', err);
+            alert('Unable to access camera. Please use the file upload option instead.');
+        }
+    }
+
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+        document.getElementById('cameraContainer').classList.add('hidden');
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0);
+
+        canvas.toBlob(function(blob) {
+            // Create a file from the blob
+            const file = new File([blob], 'selfie.jpg', { type: 'image/jpeg' });
+
+            // Create a FileList-like object
+            const dt = new DataTransfer();
+            dt.items.add(file);
+
+            // Set the file to the input
+            const faceInput = document.getElementById('faceImage');
+            faceInput.files = dt.files;
+
+            // Trigger the preview
+            handleFileSelect(faceInput, 'facePreview', 'faceLabel');
+
+            // Stop camera
+            stopCamera();
+        }, 'image/jpeg', 0.8);
+    }
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const idCard = document.getElementById('idCardImage').files[0];
+        const face = document.getElementById('faceImage').files[0];
+        const name = document.getElementById('userEnteredName').value.trim();
+        const idNumber = document.getElementById('userEnteredId').value.trim();
+
+        if (!idCard || !face) {
+            e.preventDefault();
+            alert('Please upload both ID card and face images before submitting.');
+            return false;
+        }
+
+        if (!name || !idNumber) {
+            e.preventDefault();
+            alert('Please enter both your name and ID number.');
+            return false;
+        }
+
+        if (name.length < 2) {
+            e.preventDefault();
+            alert('Please enter a valid name.');
+            return false;
+        }
+
+        if (idNumber.length < 5) {
+            e.preventDefault();
+            alert('Please enter a valid ID number.');
+            return false;
+        }
+
+        // Show loading state
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <span class="flex items-center justify-center space-x-2">
+                <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Processing & Verifying...</span>
+            </span>
+        `;
+    });
+</script>

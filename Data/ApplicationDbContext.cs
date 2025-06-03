@@ -10,6 +10,7 @@ namespace blogapplication.Data
         public DbSet<User> Users { get; set; } // Assuming you have a User model
         public DbSet<Blog> Blogs { get; set; } // Assuming you have a Blog model
         public DbSet<Comment> Comments { get; set; } // Assuming you have a Post model
+        public DbSet<KycDetail> KycDetails { get; set; } // Assuming you have a Post model
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

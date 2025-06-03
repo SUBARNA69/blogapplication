@@ -12,11 +12,13 @@ namespace blogapplication.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
+        public AdminController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment, ILogger<AdminController> logger)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
+            _logger = logger;
         }
 
         // GET: Admin
@@ -28,6 +30,11 @@ namespace blogapplication.Controllers
                 TotalBlogs = await _context.Blogs.CountAsync(),
                 TotalComments = await _context.Comments.CountAsync(),
                 BlogsThisMonth = await _context.Blogs.CountAsync(b => b.CreatedAt.Month == DateTime.Now.Month && b.CreatedAt.Year == DateTime.Now.Year),
+                // KYC Statistics
+                TotalKycSubmissions = await _context.KycDetails.CountAsync(),
+                PendingKycSubmissions = await _context.KycDetails.CountAsync(k => k.Status == "Pending"),
+                VerifiedKycSubmissions = await _context.KycDetails.CountAsync(k => k.Status == "Verified"),
+                RejectedKycSubmissions = await _context.KycDetails.CountAsync(k => k.Status == "Rejected"),
                 RecentBlogs = await _context.Blogs
                     .Include(b => b.User)
                     .Include(b => b.Comments)
@@ -36,6 +43,11 @@ namespace blogapplication.Controllers
                     .ToListAsync(),
                 RecentUsers = await _context.Users
                     .OrderByDescending(u => u.CreatedAt)
+                    .Take(5)
+                    .ToListAsync(),
+                RecentKycSubmissions = await _context.KycDetails
+                    .Include(k => k.User)
+                    .OrderByDescending(k => k.SubmittedAt)
                     .Take(5)
                     .ToListAsync()
             };
@@ -291,6 +303,277 @@ namespace blogapplication.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // ============ KYC MANAGEMENT ACTIONS ============
+
+        // GET: Admin/ManageKyc
+        public async Task<IActionResult> ManageKyc(string status = "", string searchTerm = "", int page = 1, int pageSize = 10)
+        {
+            var query = _context.KycDetails
+                .Include(k => k.User)
+                .AsQueryable();
+
+            // Filter by status
+            if (!string.IsNullOrEmpty(status) && status != "All")
+            {
+                query = query.Where(k => k.Status == status);
+            }
+
+            // Search functionality
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(k => k.User.Name.Contains(searchTerm) ||
+                                        k.User.Email.Contains(searchTerm) ||
+                                        k.ExtractedName.Contains(searchTerm) ||
+                                        k.ExtractedCitizenshipNumber.Contains(searchTerm));
+            }
+
+            var totalSubmissions = await query.CountAsync();
+            var kycSubmissions = await query
+                .OrderByDescending(k => k.SubmittedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Get statistics
+            var stats = new
+            {
+                Total = await _context.KycDetails.CountAsync(),
+                Pending = await _context.KycDetails.CountAsync(k => k.Status == "Pending"),
+                Verified = await _context.KycDetails.CountAsync(k => k.Status == "Verified"),
+                Rejected = await _context.KycDetails.CountAsync(k => k.Status == "Rejected")
+            };
+
+            ViewBag.Stats = stats;
+            ViewBag.StatusFilter = status;
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalSubmissions / pageSize);
+            ViewBag.TotalSubmissions = totalSubmissions;
+
+            return View(kycSubmissions);
+        }
+
+        // GET: Admin/KycDetails/5
+        public async Task<IActionResult> KycDetails(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var kycDetail = await _context.KycDetails
+                .Include(k => k.User)
+                .FirstOrDefaultAsync(k => k.Id == id);
+
+            if (kycDetail == null)
+            {
+                return NotFound();
+            }
+
+            return View(kycDetail);
+        }
+
+        // POST: Admin/ApproveKyc/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveKyc(int id, string extractedName = "", string extractedCitizenshipNumber = "")
+        {
+            try
+            {
+                var kycDetail = await _context.KycDetails.FindAsync(id);
+                if (kycDetail == null)
+                {
+                    TempData["ErrorMessage"] = "KYC submission not found.";
+                    return RedirectToAction(nameof(ManageKyc));
+                }
+
+                if (kycDetail.Status == "Verified")
+                {
+                    TempData["InfoMessage"] = "This KYC submission is already verified.";
+                    return RedirectToAction(nameof(KycDetails), new { id });
+                }
+
+                kycDetail.Status = "Verified";
+                kycDetail.AdminComment = "Identity verification completed successfully.";
+                kycDetail.ExtractedName = extractedName;
+                kycDetail.ExtractedCitizenshipNumber = extractedCitizenshipNumber;
+
+                _context.KycDetails.Update(kycDetail);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("KYC approved for user {UserId} by admin {AdminId}",
+                    kycDetail.UserId, User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                TempData["SuccessMessage"] = "KYC submission approved successfully.";
+                return RedirectToAction(nameof(KycDetails), new { id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error approving KYC submission {KycId}", id);
+                TempData["ErrorMessage"] = "An error occurred while approving the KYC submission.";
+                return RedirectToAction(nameof(KycDetails), new { id });
+            }
+        }
+
+        // POST: Admin/RejectKyc/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectKyc(int id, string rejectionReason)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(rejectionReason))
+                {
+                    TempData["ErrorMessage"] = "Rejection reason is required.";
+                    return RedirectToAction(nameof(KycDetails), new { id });
+                }
+
+                var kycDetail = await _context.KycDetails.FindAsync(id);
+                if (kycDetail == null)
+                {
+                    TempData["ErrorMessage"] = "KYC submission not found.";
+                    return RedirectToAction(nameof(ManageKyc));
+                }
+
+                if (kycDetail.Status == "Verified")
+                {
+                    TempData["ErrorMessage"] = "Cannot reject a verified KYC submission.";
+                    return RedirectToAction(nameof(KycDetails), new { id });
+                }
+
+                kycDetail.Status = "Rejected";
+                kycDetail.AdminComment = rejectionReason;
+
+                _context.KycDetails.Update(kycDetail);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("KYC rejected for user {UserId} by admin {AdminId}. Reason: {Reason}",
+                    kycDetail.UserId, User.FindFirst(ClaimTypes.NameIdentifier)?.Value, rejectionReason);
+
+                TempData["SuccessMessage"] = "KYC submission rejected successfully.";
+                return RedirectToAction(nameof(KycDetails), new { id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error rejecting KYC submission {KycId}", id);
+                TempData["ErrorMessage"] = "An error occurred while rejecting the KYC submission.";
+                return RedirectToAction(nameof(KycDetails), new { id });
+            }
+        }
+
+        // POST: Admin/BulkKycAction
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BulkKycAction(string action, int[] selectedIds, string bulkRejectionReason = "")
+        {
+            try
+            {
+                if (selectedIds == null || selectedIds.Length == 0)
+                {
+                    TempData["ErrorMessage"] = "Please select at least one KYC submission.";
+                    return RedirectToAction(nameof(ManageKyc));
+                }
+
+                var kycSubmissions = await _context.KycDetails
+                    .Where(k => selectedIds.Contains(k.Id))
+                    .ToListAsync();
+
+                int processedCount = 0;
+
+                foreach (var kyc in kycSubmissions)
+                {
+                    switch (action.ToLower())
+                    {
+                        case "approve":
+                            if (kyc.Status != "Verified")
+                            {
+                                kyc.Status = "Verified";
+                                kyc.AdminComment = "Bulk approved by admin.";
+                                processedCount++;
+                            }
+                            break;
+
+                        case "reject":
+                            if (string.IsNullOrWhiteSpace(bulkRejectionReason))
+                            {
+                                TempData["ErrorMessage"] = "Rejection reason is required for bulk rejection.";
+                                return RedirectToAction(nameof(ManageKyc));
+                            }
+                            if (kyc.Status != "Verified")
+                            {
+                                kyc.Status = "Rejected";
+                                kyc.AdminComment = bulkRejectionReason;
+                                processedCount++;
+                            }
+                            break;
+
+                        case "pending":
+                            kyc.Status = "Pending";
+                            kyc.AdminComment = "Reset to pending status by admin.";
+                            processedCount++;
+                            break;
+                    }
+                }
+
+                if (processedCount > 0)
+                {
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = $"Successfully {action}d {processedCount} KYC submission(s).";
+                }
+                else
+                {
+                    TempData["InfoMessage"] = "No submissions were processed.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error performing bulk KYC action {Action}", action);
+                TempData["ErrorMessage"] = "An error occurred while processing the bulk action.";
+            }
+
+            return RedirectToAction(nameof(ManageKyc));
+        }
+
+        // GET: Admin/KycStatistics
+        public async Task<IActionResult> KycStatistics()
+        {
+            var stats = new
+            {
+                Overview = new
+                {
+                    Total = await _context.KycDetails.CountAsync(),
+                    Pending = await _context.KycDetails.CountAsync(k => k.Status == "Pending"),
+                    Verified = await _context.KycDetails.CountAsync(k => k.Status == "Verified"),
+                    Rejected = await _context.KycDetails.CountAsync(k => k.Status == "Rejected")
+                },
+                MonthlySubmissions = await _context.KycDetails
+                    .Where(k => k.SubmittedAt >= DateTime.UtcNow.AddMonths(-12))
+                    .GroupBy(k => new { k.SubmittedAt.Year, k.SubmittedAt.Month })
+                    .Select(g => new {
+                        Year = g.Key.Year,
+                        Month = g.Key.Month,
+                        Count = g.Count()
+                    })
+                    .OrderBy(x => x.Year).ThenBy(x => x.Month)
+                    .ToListAsync(),
+                RecentActivity = await _context.KycDetails
+                    .Include(k => k.User)
+                    .OrderByDescending(k => k.SubmittedAt)
+                    .Take(10)
+                    .ToListAsync(),
+                ProcessingTimes = await _context.KycDetails
+                    .Where(k => k.Status != "Pending")
+                    .Select(k => new {
+                        Status = k.Status,
+                        ProcessingDays = EF.Functions.DateDiffDay(k.SubmittedAt, DateTime.UtcNow)
+                    })
+                    .ToListAsync()
+            };
+
+            return View(stats);
         }
     }
 }
