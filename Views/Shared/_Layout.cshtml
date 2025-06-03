@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - blogapplication</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/blogapplication.styles.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="bg-white shadow-md border-b border-gray-200 mb-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- App Name - Left -->
+                    <div class="flex-shrink-0">
+                        <a class="text-2xl font-bold text-gray-800 hover:text-blue-600 transition-colors duration-200" 
+                           asp-area="" asp-controller="Home" asp-action="Index">
+                            blogapplication
+                        </a>
+                    </div>
+
+                    <!-- Navigation Links - Center -->
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <div class="hidden md:block flex-1">
+                            <div class="flex items-center justify-center space-x-8">
+                                @if (User.IsInRole("User"))
+                                {
+                                    <a class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200" 
+                                       asp-area="" asp-controller="Home" asp-action="Index">
+                                        Home
+                                    </a>
+                                    <a class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200" 
+                                       asp-area="" asp-controller="Home" asp-action="Privacy">
+                                        About
+                                    </a>
+                                }
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200" 
+                                       asp-area="" asp-controller="Admin" asp-action="Index">
+                                        Dashboard
+                                    </a>
+                                    <a class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200" 
+                                       asp-area="" asp-controller="Admin" asp-action="ManageBlogs">
+                                        Manage Blogs
+                                    </a>
+                                    <a class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200" 
+                                       asp-area="" asp-controller="Admin" asp-action="ManageUsers">
+                                        Manage Users
+                                    </a>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Logout - Right -->
+                        <div class="flex-shrink-0">
+                            <form asp-controller="User" asp-action="Logout" method="post" class="inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" 
+                                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 shadow-sm hover:shadow-md">
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Guest Navigation - Center -->
+                        <div class="hidden md:block flex-1">
+                            <div class="flex items-center justify-center space-x-8">
+                                <!-- You can add public navigation links here if needed -->
+                            </div>
+                        </div>
+
+                        <!-- Login/Register - Right -->
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center space-x-4">
+                                <a class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200" 
+                                   asp-controller="User" asp-action="Login">
+                                    Login
+                                </a>
+                                <a class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 shadow-sm hover:shadow-md" 
+                                   asp-controller="User" asp-action="Register">
+                                    Register
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Mobile menu button -->
+                    <div class="md:hidden">
+                        <button type="button" 
+                                class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-md transition-colors duration-200"
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#mobile-menu" 
+                                aria-controls="mobile-menu" 
+                                aria-expanded="false" 
+                                aria-label="Toggle navigation">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile menu -->
+                <div class="md:hidden collapse" id="mobile-menu">
+                    <div class="px-2 pt-2 pb-3 space-y-1 bg-gray-50 rounded-md mt-2">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            @if (User.IsInRole("User"))
+                            {
+                                <a class="text-gray-700 hover:text-blue-600 hover:bg-white block px-3 py-2 rounded-md text-base font-medium transition-all duration-200" 
+                                   asp-area="" asp-controller="Blog" asp-action="Index">
+                                    Home
+                                </a>
+                                <a class="text-gray-700 hover:text-blue-600 hover:bg-white block px-3 py-2 rounded-md text-base font-medium transition-all duration-200" 
+                                   asp-area="" asp-controller="Home" asp-action="Privacy">
+                                    About
+                                </a>
+                            }
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a class="text-gray-700 hover:text-blue-600 hover:bg-white block px-3 py-2 rounded-md text-base font-medium transition-all duration-200" 
+                                   asp-area="" asp-controller="Admin" asp-action="Index">
+                                    Dashboard
+                                </a>
+                                <a class="text-gray-700 hover:text-blue-600 hover:bg-white block px-3 py-2 rounded-md text-base font-medium transition-all duration-200" 
+                                   asp-area="" asp-controller="Admin" asp-action="ManageBlogs">
+                                    Manage Blogs
+                                </a>
+                                <a class="text-gray-700 hover:text-blue-600 hover:bg-white block px-3 py-2 rounded-md text-base font-medium transition-all duration-200" 
+                                   asp-area="" asp-controller="Admin" asp-action="ManageUsers">
+                                    Manage Users
+                                </a>
+                            }
+
+                            <form asp-controller="User" asp-action="Logout" method="post" class="mt-4">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" 
+                                        class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                                    Logout
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a class="text-gray-700 hover:text-blue-600 hover:bg-white block px-3 py-2 rounded-md text-base font-medium transition-all duration-200" 
+                               asp-controller="User" asp-action="Login">
+                                Login
+                            </a>
+                            <a class="bg-blue-500 hover:bg-blue-600 text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 mt-2" 
+                               asp-controller="User" asp-action="Register">
+                                Register
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>  

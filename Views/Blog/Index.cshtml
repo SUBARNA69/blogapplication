@@ -1,0 +1,190 @@
+﻿@model IEnumerable<blogapplication.Models.Blog>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "All Blog Posts";
+}
+
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Blog Posts</h1>
+                        <p class="text-gray-600 mt-1">Discover amazing stories and insights</p>
+                    </div>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a asp-action="Create" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors duration-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Write New Post
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md mb-6">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    @TempData["SuccessMessage"]
+                </div>
+            </div>
+        }
+
+        <!-- Blog Posts Grid -->
+        @if (Model.Any())
+        {
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                @foreach (var blog in Model)
+                {
+                    <article class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+                        <!-- Blog Image -->
+                        @if (!string.IsNullOrEmpty(blog.Image))
+                        {
+                            <div class="aspect-w-16 aspect-h-9">
+                                <img src="@blog.Image" alt="@blog.Title" class="w-full h-48 object-cover" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                <svg class="w-16 h-16 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                        }
+
+                        <!-- Blog Content -->
+                        <div class="p-6">
+                            <!-- Author and Date -->
+                            <div class="flex items-center text-sm text-gray-500 mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center mr-2">
+                                        <span class="text-xs font-medium text-gray-600">
+                                            @(blog.User?.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                        </span>
+                                    </div>
+                                    <span>@(blog.User?.Name ?? "Unknown Author")</span>
+                                </div>
+                                <span class="mx-2">•</span>
+                                <time datetime="@blog.CreatedAt.ToString("yyyy-MM-dd")">
+                                    @blog.CreatedAt.ToString("MMM dd, yyyy")
+                                </time>
+                            </div>
+
+                            <!-- Title -->
+                            <h2 class="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+                                <a asp-action="Details" asp-route-id="@blog.Id" class="hover:text-blue-600 transition-colors duration-200">
+                                    @blog.Title
+                                </a>
+                            </h2>
+
+                            <!-- Content Preview -->
+                            <p class="text-gray-600 mb-4 line-clamp-3">
+                                @(blog.Content.Length > 150 ? blog.Content.Substring(0, 150) + "..." : blog.Content)
+                            </p>
+
+                            <!-- Footer -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                    </svg>
+                                    <span>@blog.Comments.Count comments</span>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+                                    if (blog.UserId == currentUserId || User.IsInRole("Admin"))
+                                    {
+                                        <div class="flex items-center space-x-2">
+                                            <a asp-action="Edit" asp-route-id="@blog.Id"
+                                               class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors duration-200">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                                Edit
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@blog.Id" method="post" class="inline"
+                                                  onsubmit="return confirm('Are you sure you want to delete this blog post?')">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit"
+                                                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors duration-200">
+                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            <!-- Read More Button -->
+                            <div class="mt-4">
+                                <a asp-action="Details" asp-route-id="@blog.Id"
+                                   class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                                    Read more
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="text-center py-12">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                    <svg class="mx-auto h-24 w-24 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No blog posts yet</h3>
+                    <p class="text-gray-600 mb-6">Get started by creating your first blog post.</p>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a asp-action="Create" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors duration-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Create Your First Post
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
